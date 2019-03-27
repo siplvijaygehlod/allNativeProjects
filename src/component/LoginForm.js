@@ -1,12 +1,29 @@
 import React, { Component } from 'react';
+import { Text } from 'react-native';
+import firebase from 'firebase';
 import { Button, Card, CardSection, Input } from './common';
 
 class LoginForm extends Component {
-    state = { email: '' };
+    state = { email: '', password: '', error: '' };
+
+    onButtonPress() {
+        const { email, password } = this.state;
+        /* console.log(email);
+        console.log(password);
+        console.log(firebase.auth); */
+                  
+        firebase.auth.signInWithEmailAndPassword(email, password)
+            .catch(() => {
+                firebase.auth.createUserWithEmailAndPassword(email, password)
+                    .catch(() => {
+                        this.setState({ error: 'Authentication Failed' });
+                    });
+            }); 
+    }
 
     render() {
         return (
-            <Card >
+            <Card>
                 <CardSection>
                     <Input
                         onChangeText={ email => this.setState({ email })}
@@ -17,11 +34,21 @@ class LoginForm extends Component {
                 </CardSection>
 
                 <CardSection>
-                    <Input style={{ height: 20, width: 100 }} />
-                </CardSection>                    
+                    <Input
+                        secureTextEntry
+                        placeholder="password"
+                        value={this.state.password}
+                        onChangeText={password => this.setState({ password })}
+                        label="Password"
+                    />
+                </CardSection> 
+
+                <Text style={styles.errorTextStyle}>
+                    {this.state.error}
+                </Text>                 
                 
                 <CardSection >
-                    <Button>
+                    <Button onPress={this.onButtonPress.bind(this)} >
                         Login
                     </Button>
                 </CardSection>
@@ -29,4 +56,12 @@ class LoginForm extends Component {
         );
     }
 }
+
+const styles = {
+    errorTextStyle: {
+        fontSize: 20,
+        alignSelf: 'center',
+        color: 'red'
+    }
+};
 export default LoginForm;
